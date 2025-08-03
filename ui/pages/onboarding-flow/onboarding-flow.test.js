@@ -1,7 +1,6 @@
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import configureMockStore from 'redux-mock-store';
-import { renderWithProvider } from '../../../test/lib/render-helpers';
 import {
   ///: BEGIN:ONLY_INCLUDE_IF(build-flask)
   ONBOARDING_EXPERIMENTAL_AREA,
@@ -27,7 +26,17 @@ import {
 } from '../../store/actions';
 import { mockNetworkState } from '../../../test/stub/networks';
 import { FirstTimeFlowType } from '../../../shared/constants/onboarding';
+import { renderWithProvider } from '../../../test/lib/render-helpers-navigate';
 import OnboardingFlow from './onboarding-flow';
+
+const mockUseNavigate = jest.fn();
+
+jest.mock('react-router-dom-v5-compat', () => {
+  return {
+    ...jest.requireActual('react-router-dom-v5-compat'),
+    useNavigate: () => mockUseNavigate,
+  };
+});
 
 jest.mock('../../store/actions', () => ({
   createNewVaultAndGetSeedPhrase: jest.fn().mockResolvedValue(null),
@@ -78,6 +87,10 @@ describe('Onboarding Flow', () => {
 
   const store = configureMockStore()(mockState);
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should route to the default route when completedOnboarding and seedPhraseBackedUp is true', () => {
     const completedOnboardingState = {
       metamask: {
@@ -110,13 +123,9 @@ describe('Onboarding Flow', () => {
       completedOnboardingState,
     );
 
-    const { history } = renderWithProvider(
-      <OnboardingFlow />,
-      completedOnboardingStore,
-      '/other',
-    );
+    renderWithProvider(<OnboardingFlow />, completedOnboardingStore, '/other');
 
-    expect(history.location.pathname).toStrictEqual(DEFAULT_ROUTE);
+    expect(mockUseNavigate).toHaveBeenCalledWith(DEFAULT_ROUTE);
   });
 
   describe('Create Password', () => {
@@ -176,25 +185,20 @@ describe('Onboarding Flow', () => {
   });
 
   it('should redirect to reveal recovery phrase when going to review recovery phrase without srp', () => {
-    const { history } = renderWithProvider(
-      <OnboardingFlow />,
-      store,
-      ONBOARDING_REVIEW_SRP_ROUTE,
-    );
+    renderWithProvider(<OnboardingFlow />, store, ONBOARDING_REVIEW_SRP_ROUTE);
 
-    expect(history.location.pathname).toStrictEqual(
+    expect(mockUseNavigate).toHaveBeenCalledTimes(1);
+    expect(mockUseNavigate).toHaveBeenCalledWith(
       `${ONBOARDING_REVEAL_SRP_ROUTE}/`,
+      { replace: true },
     );
   });
 
   it('should redirect to reveal recovery phrase when going to confirm recovery phrase without srp', () => {
-    const { history } = renderWithProvider(
-      <OnboardingFlow />,
-      store,
-      ONBOARDING_CONFIRM_SRP_ROUTE,
-    );
+    renderWithProvider(<OnboardingFlow />, store, ONBOARDING_CONFIRM_SRP_ROUTE);
 
-    expect(history.location.pathname).toStrictEqual(
+    expect(mockUseNavigate).toHaveBeenCalledTimes(1);
+    expect(mockUseNavigate).toHaveBeenCalledWith(
       `${ONBOARDING_REVEAL_SRP_ROUTE}/`,
     );
   });

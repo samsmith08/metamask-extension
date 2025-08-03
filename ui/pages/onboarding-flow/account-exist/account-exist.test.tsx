@@ -1,8 +1,8 @@
 import React from 'react';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
-import { waitFor } from '@testing-library/react';
-import { fireEvent, renderWithProvider } from '../../../../test/jest';
+import { waitFor, fireEvent } from '@testing-library/react';
+import { renderWithProvider } from '../../../../test/lib/render-helpers-navigate';
 import initializedMockState from '../../../../test/data/mock-state.json';
 import { FirstTimeFlowType } from '../../../../shared/constants/onboarding';
 import {
@@ -12,18 +12,18 @@ import {
 import * as Actions from '../../../store/actions';
 import AccountExist from './account-exist';
 
-const mockHistoryReplace = jest.fn();
+const mockUseNavigate = jest.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    replace: mockHistoryReplace,
-  }),
-}));
+jest.mock('react-router-dom-v5-compat', () => {
+  return {
+    ...jest.requireActual('react-router-dom-v5-compat'),
+    useNavigate: () => mockUseNavigate,
+  };
+});
 
 describe('Account Exist Seedless Onboarding View', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   const mockState = {
@@ -55,7 +55,7 @@ describe('Account Exist Seedless Onboarding View', () => {
     fireEvent.click(loginButton);
 
     await waitFor(() => {
-      expect(mockHistoryReplace).toHaveBeenCalledWith(ONBOARDING_UNLOCK_ROUTE);
+      expect(mockUseNavigate).toHaveBeenCalledWith(ONBOARDING_UNLOCK_ROUTE);
       expect(setFirstTimeFlowTypeSpy).toHaveBeenCalledWith(
         FirstTimeFlowType.socialImport,
       );
@@ -73,7 +73,7 @@ describe('Account Exist Seedless Onboarding View', () => {
 
     renderWithProvider(<AccountExist />, store);
 
-    expect(mockHistoryReplace).toHaveBeenCalledWith(ONBOARDING_WELCOME_ROUTE);
+    expect(mockUseNavigate).toHaveBeenCalledWith(ONBOARDING_WELCOME_ROUTE);
   });
 
   it('should reset login state and navigate to the welcome page when the button is clicked', async () => {
@@ -91,7 +91,7 @@ describe('Account Exist Seedless Onboarding View', () => {
     fireEvent.click(loginButton);
 
     await waitFor(() => {
-      expect(mockHistoryReplace).toHaveBeenCalledWith(ONBOARDING_WELCOME_ROUTE);
+      expect(mockUseNavigate).toHaveBeenCalledWith(ONBOARDING_WELCOME_ROUTE);
       expect(resetOnboardingSpy).toHaveBeenCalled();
     });
   });

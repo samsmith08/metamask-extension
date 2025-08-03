@@ -4,8 +4,8 @@ import thunk from 'redux-thunk';
 import { BtcAccountType, SolAccountType } from '@metamask/keyring-api';
 import { SEND_STAGES } from '../../ducks/send';
 import {
-  CONFIRMATION_V_NEXT_ROUTE,
   DEFAULT_ROUTE,
+  CONFIRMATION_V_NEXT_ROUTE,
 } from '../../helpers/constants/routes';
 import { renderWithProvider } from '../../../test/lib/render-helpers-navigate';
 import mockSendState from '../../../test/data/mock-send-state.json';

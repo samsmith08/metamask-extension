@@ -1,9 +1,8 @@
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
-import reactRouterDom from 'react-router-dom';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
-import { renderWithProvider } from '../../../../test/jest';
+import { renderWithProvider } from '../../../../test/lib/render-helpers-navigate';
 import {
   setCompletedOnboarding,
   toggleExternalServices,
@@ -33,16 +32,14 @@ jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
 }));
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: jest.fn(() => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-  })),
-}));
+const mockUseNavigate = jest.fn();
 
-const pushMock = jest.fn();
-const replaceMock = jest.fn();
+jest.mock('react-router-dom-v5-compat', () => {
+  return {
+    ...jest.requireActual('react-router-dom-v5-compat'),
+    useNavigate: () => mockUseNavigate,
+  };
+});
 
 describe('Creation Successful Onboarding View', () => {
   const arrangeMocks = (
@@ -87,14 +84,14 @@ describe('Creation Successful Onboarding View', () => {
 
     toggleExternalServices.mockClear();
     setCompletedOnboarding.mockClear();
-
-    jest
-      .spyOn(reactRouterDom, 'useHistory')
-      .mockImplementation()
-      .mockReturnValue({ push: pushMock, replace: replaceMock });
+    mockUseNavigate.mockClear();
 
     return store;
   };
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('When the "Done" button is clicked', () => {
     it('should call toggleExternalServices, setCompletedOnboarding and signIn when the "Done" button is clicked', async () => {
@@ -108,8 +105,8 @@ describe('Creation Successful Onboarding View', () => {
       await Promise.all(mockPromises);
       expect(toggleExternalServices).toHaveBeenCalledTimes(1);
       expect(setCompletedOnboarding).toHaveBeenCalledTimes(1);
-      expect(pushMock).toHaveBeenCalledTimes(1);
-      expect(pushMock).toHaveBeenCalledWith(DEFAULT_ROUTE);
+      expect(mockUseNavigate).toHaveBeenCalledTimes(1);
+      expect(mockUseNavigate).toHaveBeenCalledWith(DEFAULT_ROUTE);
     });
   });
 
@@ -135,8 +132,8 @@ describe('Creation Successful Onboarding View', () => {
       const store = arrangeMocks(mockState);
       renderWithProvider(<PinExtension />, store);
 
-      expect(replaceMock).toHaveBeenCalledTimes(1);
-      expect(replaceMock).toHaveBeenCalledWith(ONBOARDING_WELCOME_ROUTE);
+      expect(mockUseNavigate).toHaveBeenCalledTimes(1);
+      expect(mockUseNavigate).toHaveBeenCalledWith(ONBOARDING_WELCOME_ROUTE);
     });
   });
 });
