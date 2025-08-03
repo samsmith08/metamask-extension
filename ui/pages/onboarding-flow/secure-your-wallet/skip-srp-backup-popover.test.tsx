@@ -5,8 +5,6 @@ import thunk from 'redux-thunk';
 import { renderWithProvider } from '../../../../test/lib/render-helpers-navigate';
 import SkipSRPBackup from './skip-srp-backup-popover';
 
-const mockUseNavigate = jest.fn();
-
 describe('SkipSRPBackup', () => {
   const mockStore = {
     metamask: {

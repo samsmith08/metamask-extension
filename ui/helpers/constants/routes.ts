@@ -13,6 +13,7 @@ export const ASSET_ROUTE = '/asset';
 export const SETTINGS_ROUTE = '/settings';
 export const GENERAL_ROUTE = '/settings/general';
 export const ADVANCED_ROUTE = '/settings/advanced';
+export const DEVELOPER_OPTIONS_ROUTE = '/settings/developer-options';
 export const EXPERIMENTAL_ROUTE = '/settings/experimental';
 export const SECURITY_ROUTE = '/settings/security';
 export const ABOUT_US_ROUTE = '/settings/about-us';
@@ -122,6 +123,7 @@ export const DEFI_ROUTE = '/defi';
 
 export const ROUTES: AppRoute[] = [
   { path: DEFAULT_ROUTE, label: 'Home', trackInAnalytics: true },
+  { path: '', label: 'Home', trackInAnalytics: true }, // "" is an alias for the Home route
   { path: UNLOCK_ROUTE, label: 'Unlock Page', trackInAnalytics: true },
   { path: LOCK_ROUTE, label: 'Lock Page', trackInAnalytics: true },
   {
@@ -144,6 +146,11 @@ export const ROUTES: AppRoute[] = [
     path: ADVANCED_ROUTE,
     label: 'Advanced Settings Page',
     trackInAnalytics: true,
+  },
+  {
+    path: DEVELOPER_OPTIONS_ROUTE,
+    label: 'Developer Options Page',
+    trackInAnalytics: false,
   },
   {
     path: EXPERIMENTAL_ROUTE,
@@ -450,6 +457,7 @@ export const ROUTES: AppRoute[] = [
     label: 'Prepare Cross Chain Swap Page',
     trackInAnalytics: true,
   },
+  { path: SWAPS_ROUTE, label: 'Swaps', trackInAnalytics: false },
   {
     path: PREPARE_SWAP_ROUTE,
     label: 'Prepare Swap Page',
@@ -591,6 +599,11 @@ export const ROUTES: AppRoute[] = [
   },
   ///: BEGIN:ONLY_INCLUDE_IF(build-flask)
   {
+    path: INITIALIZE_EXPERIMENTAL_AREA,
+    label: 'Initialize Experimental Area',
+    trackInAnalytics: false,
+  },
+  {
     path: ONBOARDING_EXPERIMENTAL_AREA,
     label: 'Onboarding Experimental Area',
     trackInAnalytics: false,
@@ -601,3 +614,11 @@ export const ROUTES: AppRoute[] = [
 export const getPaths = memoize((): string[] =>
   ROUTES.filter((r) => r.trackInAnalytics).map((r) => r.path),
 );
+
+// PATH_NAME_MAP for backward compatibility - automatically generated from ROUTES
+export const PATH_NAME_MAP = new Map<string, string>();
+
+// Populate the map from the ROUTES array
+ROUTES.forEach((route) => {
+  PATH_NAME_MAP.set(route.path, route.label);
+});

@@ -72,7 +72,7 @@ export type PullRequestFile = {
   filename: string;
   additions: number;
   deletions: number;
-}
+};
 
 /**
  * Retrieves files changed in a specific pull request

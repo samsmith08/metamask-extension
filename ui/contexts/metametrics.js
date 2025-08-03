@@ -42,7 +42,6 @@ import { trackMetaMetricsEvent, trackMetaMetricsPage } from '../store/actions';
  * @typedef {import('../../shared/lib/trace').TraceCallback} TraceCallback
  */
 
-// types
 /**
  * @typedef {Omit<MetaMetricsEventPayload, 'environmentType' | 'page' | 'referrer'>} UIMetricsEventPayload
  */

@@ -41,7 +41,9 @@ async function main() {
   // Handle unknown or invalid status
   console.log(`❓ Unknown build status: ${env.BUILD_STATUS}`);
   console.log('⚠️ Skipping Slack notification due to unknown status');
-  throw new Error(`Invalid BUILD_STATUS: ${env.BUILD_STATUS}. Expected 'success' or 'failure'.`);
+  throw new Error(
+    `Invalid BUILD_STATUS: ${env.BUILD_STATUS}. Expected 'success' or 'failure'.`,
+  );
 }
 
 async function postFailureNotification(env: any, version: string) {
