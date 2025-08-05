@@ -2,12 +2,25 @@ import React from 'react';
 import configureMockStore from 'redux-mock-store';
 import { fireEvent, waitFor } from '@testing-library/react';
 import thunk from 'redux-thunk';
-import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { renderWithProvider } from '../../../test/lib/render-helpers';
+import { renderWithProvider } from '../../../test/lib/render-helpers-navigate';
 import { ONBOARDING_WELCOME_ROUTE } from '../../helpers/constants/routes';
 import { FirstTimeFlowType } from '../../../shared/constants/onboarding';
 import UnlockPage from '.';
+
+// Mock navigation hooks for unit tests
+const mockNavigate = jest.fn();
+const mockLocation = {
+  pathname: '/unlock',
+  search: '',
+  state: null,
+};
+
+jest.mock('react-router-dom-v5-compat', () => ({
+  ...jest.requireActual('react-router-dom-v5-compat'),
+  useNavigate: () => mockNavigate,
+  useLocation: () => mockLocation,
+  useParams: () => ({}),
+}));
 
 const mockTryUnlockMetamask = jest.fn(() => {
   return async () => {
@@ -42,6 +55,14 @@ describe('Unlock Page', () => {
     metamask: {},
   };
   const mockStore = configureMockStore([thunk])(mockState);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Reset location mock to default
+    mockLocation.pathname = '/unlock';
+    mockLocation.search = '';
+    mockLocation.state = null;
+  });
 
   it('should match snapshot', () => {
     const { container } = renderWithProvider(<UnlockPage />, mockStore);
@@ -107,11 +128,6 @@ describe('Unlock Page', () => {
     };
     const store = configureMockStore([thunk])(mockStateWithUnlock);
 
-    const history = createMemoryHistory({
-      initialEntries: [{ pathname: '/unlock' }],
-    });
-
-    jest.spyOn(history, 'replace');
     const mockLoginWithDifferentMethod = jest.fn();
     const mockForceUpdateMetamaskState = jest.fn();
 
@@ -121,9 +137,7 @@ describe('Unlock Page', () => {
     };
 
     const { queryByText } = renderWithProvider(
-      <Router history={history}>
-        <UnlockPage {...props} />
-      </Router>,
+      <UnlockPage {...props} />,
       store,
     );
 
@@ -132,7 +146,9 @@ describe('Unlock Page', () => {
     await waitFor(() => {
       expect(mockLoginWithDifferentMethod).toHaveBeenCalled();
       expect(mockForceUpdateMetamaskState).toHaveBeenCalled();
-      expect(history.replace).toHaveBeenCalledWith(ONBOARDING_WELCOME_ROUTE);
+      expect(mockNavigate).toHaveBeenCalledWith(ONBOARDING_WELCOME_ROUTE, {
+        replace: true,
+      });
     });
   });
 
@@ -142,21 +158,34 @@ describe('Unlock Page', () => {
       metamask: { isUnlocked: true },
     };
     const store = configureMockStore([thunk])(mockStateWithUnlock);
-    const history = createMemoryHistory({
-      initialEntries: [
-        { pathname: '/unlock', state: { from: { pathname: intendedPath } } },
-      ],
-    });
-    jest.spyOn(history, 'push');
-    renderWithProvider(
-      <Router history={history}>
-        <UnlockPage />
-      </Router>,
-      store,
-    );
-    expect(history.push).toHaveBeenCalledTimes(1);
-    expect(history.push).toHaveBeenCalledWith(intendedPath);
-    expect(history.location.pathname).toBe(intendedPath);
+
+    // Mock location with state
+    mockLocation.state = { from: { pathname: intendedPath } };
+
+    renderWithProvider(<UnlockPage />, store);
+
+    expect(mockNavigate).toHaveBeenCalledWith(intendedPath);
+  });
+
+  it('should redirect to history location with search params', () => {
+    const intendedPath = '/previous-route';
+    const intendedSearch = '?param=value';
+    const mockStateWithUnlock = {
+      metamask: { isUnlocked: true },
+    };
+    const store = configureMockStore([thunk])(mockStateWithUnlock);
+
+    // Mock location with state including search params
+    mockLocation.state = {
+      from: {
+        pathname: intendedPath,
+        search: intendedSearch,
+      },
+    };
+
+    renderWithProvider(<UnlockPage />, store);
+
+    expect(mockNavigate).toHaveBeenCalledWith(intendedPath + intendedSearch);
   });
 
   it('changes password, submits, and redirects to the specified route', async () => {
@@ -166,31 +195,26 @@ describe('Unlock Page', () => {
       metamask: { isUnlocked: false },
     };
     const store = configureMockStore([thunk])(mockStateNonUnlocked);
-    const history = createMemoryHistory({
-      initialEntries: [
-        {
-          pathname: '/unlock',
-          state: { from: { pathname: intendedPath, search: intendedSearch } },
-        },
-      ],
-    });
-    jest.spyOn(history, 'push');
-    const { queryByTestId } = renderWithProvider(
-      <Router history={history}>
-        <UnlockPage />
-      </Router>,
-      store,
-    );
+
+    // Mock location with state
+    mockLocation.state = {
+      from: {
+        pathname: intendedPath,
+        search: intendedSearch,
+      },
+    };
+
+    const { queryByTestId } = renderWithProvider(<UnlockPage />, store);
+
     const passwordField = queryByTestId('unlock-password');
     const loginButton = queryByTestId('unlock-submit');
+
     fireEvent.change(passwordField, { target: { value: 'a-password' } });
     fireEvent.click(loginButton);
+
     await Promise.resolve(); // Wait for async operations
 
     expect(mockTryUnlockMetamask).toHaveBeenCalledTimes(1);
-    expect(history.push).toHaveBeenCalledTimes(1);
-    expect(history.push).toHaveBeenCalledWith(intendedPath + intendedSearch);
-    expect(history.location.pathname).toBe(intendedPath);
-    expect(history.location.search).toBe(intendedSearch);
+    expect(mockNavigate).toHaveBeenCalledWith(intendedPath + intendedSearch);
   });
 });

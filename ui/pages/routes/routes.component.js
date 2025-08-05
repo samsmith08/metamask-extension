@@ -1,7 +1,7 @@
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component, Suspense } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes as RouterRoutes } from 'react-router-dom-v5-compat';
 import IdleTimer from 'react-idle-timer';
 
 import Authenticated from '../../helpers/higher-order-components/authenticated';
@@ -279,126 +279,340 @@ export default class Routes extends Component {
   renderRoutes() {
     const { autoLockTimeLimit, setLastActiveTime, forgottenPassword } =
       this.props;
-    const RestoreVaultComponent = forgottenPassword ? Route : Initialized;
 
     const routes = (
       <Suspense fallback={null}>
         {/* since the loading time is less than 200ms, we decided not to show a spinner fallback or anything */}
-        <Switch>
-          <Route path={ONBOARDING_ROUTE} component={OnboardingFlow} />
-          <Route path={LOCK_ROUTE} component={Lock} exact />
-          <Initialized path={UNLOCK_ROUTE} component={UnlockPage} exact />
-          <Route path={DEEP_LINK_ROUTE} component={DeepLink} />
-          <RestoreVaultComponent
+        <RouterRoutes>
+          <Route path={ONBOARDING_ROUTE} element={<OnboardingFlow />} />
+          <Route path={LOCK_ROUTE} element={<Lock />} />
+          <Route path={UNLOCK_ROUTE} element={<UnlockPage />} />
+          <Route path={DEEP_LINK_ROUTE} element={<DeepLink />} />
+          <Route
             path={RESTORE_VAULT_ROUTE}
-            component={RestoreVaultPage}
-            exact
+            element={
+              forgottenPassword ? (
+                <RestoreVaultPage />
+              ) : (
+                <Initialized
+                  completedOnboarding={this.props.completedOnboarding}
+                  element={<RestoreVaultPage />}
+                />
+              )
+            }
           />
-          <Authenticated
+          <Route
             path={SMART_ACCOUNT_UPDATE}
-            component={SmartAccountUpdate}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<SmartAccountUpdate />}
+              />
+            }
           />
-          <Authenticated
-            // `:keyringId` is optional here, if not provided, this will fallback
-            // to the main seed phrase.
+          <Route
             path={`${REVEAL_SEED_ROUTE}/:keyringId?`}
-            component={RevealSeedConfirmation}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<RevealSeedConfirmation />}
+              />
+            }
           />
-          <Authenticated path={IMPORT_SRP_ROUTE} component={ImportSrpPage} />
-          <Authenticated path={SETTINGS_ROUTE} component={Settings} />
-          <Authenticated
+          <Route
+            path={IMPORT_SRP_ROUTE}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<ImportSrpPage />}
+              />
+            }
+          />
+          <Route
+            path={SETTINGS_ROUTE}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<Settings />}
+              />
+            }
+          />
+          <Route
             path={NOTIFICATIONS_SETTINGS_ROUTE}
-            component={NotificationsSettings}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<NotificationsSettings />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={`${NOTIFICATIONS_ROUTE}/:uuid`}
-            component={NotificationDetails}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<NotificationDetails />}
+              />
+            }
           />
-          <Authenticated path={NOTIFICATIONS_ROUTE} component={Notifications} />
-          <Authenticated exact path={SNAPS_ROUTE} component={SnapList} />
-          <Authenticated path={SNAPS_VIEW_ROUTE} component={SnapView} />
-          <Authenticated
+          <Route
+            path={NOTIFICATIONS_ROUTE}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<Notifications />}
+              />
+            }
+          />
+          <Route
+            path={SNAPS_ROUTE}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<SnapList />}
+              />
+            }
+          />
+          <Route
+            path={SNAPS_VIEW_ROUTE}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<SnapView />}
+              />
+            }
+          />
+          <Route
             path={`${CONFIRM_TRANSACTION_ROUTE}/:id?`}
-            component={ConfirmTransaction}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<ConfirmTransaction />}
+              />
+            }
           />
-          <Authenticated path={SEND_ROUTE} component={SendPage} exact />
-          <Authenticated path={SWAPS_ROUTE} component={Swaps} />
-          <Authenticated
+          <Route
+            path={SEND_ROUTE}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<SendPage />}
+              />
+            }
+          />
+          <Route
+            path={SWAPS_ROUTE}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<Swaps />}
+              />
+            }
+          />
+          <Route
             path={`${CROSS_CHAIN_SWAP_TX_DETAILS_ROUTE}/:srcTxMetaId`}
-            component={CrossChainSwapTxDetails}
-            exact
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<CrossChainSwapTxDetails />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={CROSS_CHAIN_SWAP_ROUTE}
-            component={CrossChainSwap}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<CrossChainSwap />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={CONFIRM_ADD_SUGGESTED_TOKEN_ROUTE}
-            component={ConfirmAddSuggestedTokenPage}
-            exact
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<ConfirmAddSuggestedTokenPage />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={CONFIRM_ADD_SUGGESTED_NFT_ROUTE}
-            component={ConfirmAddSuggestedNftPage}
-            exact
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<ConfirmAddSuggestedNftPage />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={`${CONFIRMATION_V_NEXT_ROUTE}/:id?`}
-            component={ConfirmationPage}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<ConfirmationPage />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={NEW_ACCOUNT_ROUTE}
-            component={CreateAccountPage}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<CreateAccountPage />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={`${CONNECT_ROUTE}/:id`}
-            component={PermissionsConnect}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<PermissionsConnect />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={`${ASSET_ROUTE}/image/:asset/:id`}
-            component={NftFullImage}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<NftFullImage />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={`${ASSET_ROUTE}/:chainId/:asset/:id`}
-            component={Asset}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<Asset />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={`${ASSET_ROUTE}/:chainId/:asset/`}
-            component={Asset}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<Asset />}
+              />
+            }
           />
-          <Authenticated path={`${ASSET_ROUTE}/:chainId`} component={Asset} />
-          <Authenticated
+          <Route
+            path={`${ASSET_ROUTE}/:chainId`}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<Asset />}
+              />
+            }
+          />
+          <Route
             path={`${DEFI_ROUTE}/:chainId/:protocolId`}
-            component={DeFiPage}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<DeFiPage />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={`${CONNECTIONS}/:origin`}
-            component={Connections}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<Connections />}
+              />
+            }
           />
-          <Authenticated path={PERMISSIONS} component={PermissionsPage} exact />
-          <Authenticated
+          <Route
+            path={PERMISSIONS}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<PermissionsPage />}
+              />
+            }
+          />
+          <Route
             path={`${REVIEW_PERMISSIONS}/:origin`}
-            component={ReviewPermissions}
-            exact
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<ReviewPermissions />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={WALLET_DETAILS_ROUTE}
-            component={WalletDetails}
-            exact
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<WalletDetails />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={`${ACCOUNT_DETAILS_ROUTE}/:address`}
-            component={MultichainAccountDetails}
-            exact
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<MultichainAccountDetails />}
+              />
+            }
           />
-          <Authenticated
+          <Route
             path={`${ACCOUNT_DETAILS_QR_CODE_ROUTE}/:address`}
-            component={AddressQRCode}
-            exact
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<AddressQRCode />}
+              />
+            }
           />
 
-          <Authenticated path={DEFAULT_ROUTE} component={Home} />
-        </Switch>
+          <Route
+            path={DEFAULT_ROUTE}
+            element={
+              <Authenticated
+                isUnlocked={this.props.isUnlocked}
+                completedOnboarding={this.props.completedOnboarding}
+                element={<Home />}
+              />
+            }
+          />
+        </RouterRoutes>
       </Suspense>
     );
 

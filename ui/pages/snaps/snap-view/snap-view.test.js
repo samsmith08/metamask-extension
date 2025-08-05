@@ -20,10 +20,11 @@ jest.mock('../../../store/actions.ts', () => {
   };
 });
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+jest.mock('react-router-dom-v5-compat', () => {
+  const original = jest.requireActual('react-router-dom-v5-compat');
   return {
     ...original,
+    useNavigate: jest.fn(),
     useLocation: jest.fn(() => ({
       pathname: `/snaps/view/${encodeURIComponent(
         'npm:@metamask/test-snap-bip44',

@@ -1,17 +1,23 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
+import { fireEvent } from '@testing-library/react';
 import configureStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import mockState from '../../../test/data/mock-state.json';
+import { renderWithProvider } from '../../../test/lib/render-helpers-navigate';
 import Notifications from './notifications';
+import { NOTIFICATIONS_SETTINGS_ROUTE } from '../../helpers/constants/routes';
 
 const mockDispatch = jest.fn();
+const mockNavigate = jest.fn();
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useDispatch: () => mockDispatch,
+}));
+
+jest.mock('react-router-dom-v5-compat', () => ({
+  ...jest.requireActual('react-router-dom-v5-compat'),
+  useNavigate: () => mockNavigate,
 }));
 
 jest.mock(
@@ -60,39 +66,27 @@ const mockStore = configureStore(middlewares);
 const store = mockStore(initialState);
 
 describe('Notifications Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders correctly', () => {
-    const { getByTestId } = render(
-      <Provider store={store}>
-        <MemoryRouter>
-          <Notifications />
-        </MemoryRouter>
-      </Provider>,
-    );
+    const { getByTestId } = renderWithProvider(<Notifications />, store);
 
     expect(getByTestId('notifications-page')).toBeInTheDocument();
   });
 
   it('navigates to default route on back button click', () => {
-    const { getByTestId } = render(
-      <Provider store={store}>
-        <MemoryRouter>
-          <Notifications />
-        </MemoryRouter>
-      </Provider>,
-    );
+    const { getByTestId } = renderWithProvider(<Notifications />, store);
 
     fireEvent.click(getByTestId('back-button'));
+    expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 
   it('navigates to settings on settings button click', () => {
-    const { getByTestId } = render(
-      <Provider store={store}>
-        <MemoryRouter>
-          <Notifications />
-        </MemoryRouter>
-      </Provider>,
-    );
+    const { getByTestId } = renderWithProvider(<Notifications />, store);
 
     fireEvent.click(getByTestId('notifications-settings-button'));
+    expect(mockNavigate).toHaveBeenCalledWith(NOTIFICATIONS_SETTINGS_ROUTE);
   });
 });

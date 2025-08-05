@@ -2,12 +2,10 @@ import React from 'react';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 
-import ReactRouterDOM from 'react-router-dom';
-
 import * as ConfirmTransactionDucks from '../../../ducks/confirm-transaction/confirm-transaction.duck';
 import * as Actions from '../../../store/actions';
 import _mockState from '../../../../test/data/mock-state.json';
-import { renderWithProvider } from '../../../../test/lib/render-helpers';
+import { renderWithProvider } from '../../../../test/lib/render-helpers-navigate';
 import { setBackgroundConnection } from '../../../store/background-connection';
 
 import {
@@ -53,13 +51,14 @@ jest.mock(
   }),
 );
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+const mockUseNavigate = jest.fn();
+const mockUseParams = jest.fn();
+
+jest.mock('react-router-dom-v5-compat', () => {
   return {
-    ...original,
-    useHistory: () => ({
-      replace: jest.fn(),
-    }),
+    ...jest.requireActual('react-router-dom-v5-compat'),
+    useNavigate: () => mockUseNavigate,
+    useParams: () => mockUseParams,
   };
 });
 
@@ -181,7 +180,7 @@ describe('Confirmation Transaction Page', () => {
         ...mockState,
         metamask: { ...mockState.metamask, transactions: [] },
       });
-      jest.spyOn(ReactRouterDOM, 'useParams').mockImplementation(() => {
+      mockUseParams.mockImplementation(() => {
         return { id: null };
       });
       ConfirmTransactionDucks.setTransactionToConfirm.mockClear();
@@ -197,7 +196,7 @@ describe('Confirmation Transaction Page', () => {
       it('should not call history.replace(mostRecentOverviewPage)', () => {
         const mockStore = configureMockStore(middleware)(mockState);
         const replaceSpy = jest.fn();
-        jest.spyOn(ReactRouterDOM, 'useHistory').mockImplementation(() => {
+        mockUseNavigate.mockImplementation(() => {
           return {
             replace: replaceSpy,
           };

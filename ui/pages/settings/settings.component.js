@@ -1,6 +1,10 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { Switch, Route, matchPath, Redirect } from 'react-router-dom';
+import {
+  Routes as RouterRoutes,
+  Route,
+  matchPath,
+} from 'react-router-dom-v5-compat';
 import classnames from 'classnames';
 import TabBar from '../../components/app/tab-bar';
 
@@ -424,7 +428,7 @@ class SettingsPage extends PureComponent {
           ) {
             return true;
           }
-          return matchPath(currentPath, { exact: true, path: key });
+          return matchPath({ exact: true, path: key }, currentPath);
         }}
         onSelect={(key) =>
           history.push({
@@ -437,86 +441,80 @@ class SettingsPage extends PureComponent {
   }
 
   renderContent() {
+    const AddNetworkRedirect = () => {
+      this.props.toggleNetworkMenu({ isAddingNewNetwork: true });
+      window.location.hash = DEFAULT_ROUTE;
+      return null;
+    };
+
+    const NetworksRedirect = () => {
+      this.props.toggleNetworkMenu();
+      window.location.hash = DEFAULT_ROUTE;
+      return null;
+    };
+
+    const PopularNetworkRedirect = () => {
+      this.props.toggleNetworkMenu();
+      window.location.hash = DEFAULT_ROUTE;
+      return null;
+    };
+
     return (
-      <Switch>
+      <RouterRoutes>
         <Route
-          exact
           path={GENERAL_ROUTE}
-          render={(routeProps) => (
+          element={
             <SettingsTab
-              {...routeProps}
               lastFetchedConversionDate={this.state.lastFetchedConversionDate}
             />
-          )}
+          }
         />
-        <Route exact path={ABOUT_US_ROUTE} render={() => <InfoTab />} />
+        <Route path={ABOUT_US_ROUTE} element={<InfoTab />} />
         <Route
           path={`${SNAP_SETTINGS_ROUTE}/:snapId`}
-          component={SnapSettingsRenderer}
+          element={<SnapSettingsRenderer />}
         />
-        <Route exact path={ADVANCED_ROUTE} component={AdvancedTab} />
-        <Route exact path={BACKUPANDSYNC_ROUTE} component={BackupAndSyncTab} />
+        <Route path={ADVANCED_ROUTE} element={<AdvancedTab />} />
+        <Route path={BACKUPANDSYNC_ROUTE} element={<BackupAndSyncTab />} />
+        <Route path={ADD_NETWORK_ROUTE} element={<AddNetworkRedirect />} />
+        <Route path={NETWORKS_ROUTE} element={<NetworksRedirect />} />
         <Route
-          exact
-          path={ADD_NETWORK_ROUTE}
-          render={() => {
-            this.props.toggleNetworkMenu({ isAddingNewNetwork: true });
-            return <Redirect to={{ pathname: DEFAULT_ROUTE }} />;
-          }}
-        />
-        <Route
-          exact
-          path={NETWORKS_ROUTE}
-          render={() => {
-            this.props.toggleNetworkMenu();
-            return <Redirect to={{ pathname: DEFAULT_ROUTE }} />;
-          }}
-        />
-        <Route
-          exact
           path={ADD_POPULAR_CUSTOM_NETWORK}
-          render={() => {
-            this.props.toggleNetworkMenu();
-            return <Redirect to={{ pathname: DEFAULT_ROUTE }} />;
-          }}
+          element={<PopularNetworkRedirect />}
         />
-        <Route exact path={SECURITY_ROUTE} component={SecurityTab} />
-        <Route exact path={EXPERIMENTAL_ROUTE} component={ExperimentalTab} />
+        <Route path={SECURITY_ROUTE} element={<SecurityTab />} />
+        <Route path={EXPERIMENTAL_ROUTE} element={<ExperimentalTab />} />
         {(process.env.ENABLE_SETTINGS_PAGE_DEV_OPTIONS ||
           process.env.IN_TEST) && (
           <Route
-            exact
             path={DEVELOPER_OPTIONS_ROUTE}
-            component={DeveloperOptionsTab}
+            element={<DeveloperOptionsTab />}
           />
         )}
-        <Route exact path={CONTACT_LIST_ROUTE} component={ContactListTab} />
-        <Route exact path={CONTACT_ADD_ROUTE} component={ContactListTab} />
+        <Route path={CONTACT_LIST_ROUTE} element={<ContactListTab />} />
+        <Route path={CONTACT_ADD_ROUTE} element={<ContactListTab />} />
         <Route
-          exact
           path={`${CONTACT_EDIT_ROUTE}/:id`}
-          component={ContactListTab}
+          element={<ContactListTab />}
         />
         <Route
-          exact
           path={`${CONTACT_VIEW_ROUTE}/:id`}
-          component={ContactListTab}
+          element={<ContactListTab />}
         />
-        <Route exact path={REVEAL_SRP_LIST_ROUTE} component={RevealSrpList} />
+        <Route path={REVEAL_SRP_LIST_ROUTE} element={<RevealSrpList />} />
         <Route
-          exact
           path={SECURITY_PASSWORD_CHANGE_ROUTE}
-          component={ChangePassword}
+          element={<ChangePassword />}
         />
         <Route
-          render={(routeProps) => (
+          path="*"
+          element={
             <SettingsTab
-              {...routeProps}
               lastFetchedConversionDate={this.state.lastFetchedConversionDate}
             />
-          )}
+          }
         />
-      </Switch>
+      </RouterRoutes>
     );
   }
 }
