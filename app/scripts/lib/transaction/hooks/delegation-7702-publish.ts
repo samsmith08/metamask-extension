@@ -137,7 +137,7 @@ export class Delegation7702PublishHook {
       parseInt(transactionMeta.chainId, 16),
     );
     const delegationManagerAddress = delegationEnvironment.DelegationManager;
-    const includeTransfer = !isGaslessSwap;
+    const includeTransfer = !isGaslessSwap && !gasFeeToken?.isSponsored;
 
     if (includeTransfer && (!gasFeeToken || gasFeeToken === undefined)) {
       throw new Error('Gas fee token not found');
