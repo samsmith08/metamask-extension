@@ -50,7 +50,6 @@ import OnboardingController from '../controllers/onboarding';
 import { PreferencesController } from '../controllers/preferences-controller';
 import SwapsController from '../controllers/swaps';
 import { InstitutionalSnapController } from '../controllers/institutional-snap/InstitutionalSnapController';
-import { GatorPermissionsController } from '@metamask/gator-permissions-controller';
 
 /**
  * Union of all controllers supporting or required by modular initialization.
@@ -62,7 +61,6 @@ export type Controller =
   | DeFiPositionsController
   | ExecutionService
   | GasFeeController
-  | GatorPermissionsController
   | JsonSnapsRegistry
   | KeyringController
   | MultichainAssetsController
@@ -108,7 +106,6 @@ export type ControllerFlatState = AccountsController['state'] &
   DeFiPositionsController['state'] &
   DelegationController['state'] &
   GasFeeController['state'] &
-  GatorPermissionsController['state'] &
   JsonSnapsRegistry['state'] &
   KeyringController['state'] &
   MultichainAssetsController['state'] &
