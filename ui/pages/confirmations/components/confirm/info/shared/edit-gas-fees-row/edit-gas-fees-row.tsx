@@ -55,10 +55,7 @@ export const EditGasFeesRow = ({
   const fiatValue = gasFeeToken ? gasFeeToken.amountFiat : fiatFee;
   const tokenValue = gasFeeToken ? gasFeeToken.amountFormatted : nativeFee;
   const metamaskFeeFiat = gasFeeToken?.metamaskFeeFiat;
-  const isSponsored = transactionMeta.gasFeeTokens?.find(
-    (token) => token.isSponsored === true &&
-      token.tokenAddress === NATIVE_TOKEN_ADDRESS,
-  );
+  const isGasFeeSponsored = transactionMeta.isGasFeeSponsored;
 
   const tooltip = gasFeeToken
     ? t('confirmGasFeeTokenTooltip', [metamaskFeeFiat])
@@ -88,7 +85,7 @@ export const EditGasFeesRow = ({
             textAlign={TextAlign.Center}
             gap={1}
           >
-            {!gasFeeToken && !isSponsored && (
+            {!gasFeeToken && !isGasFeeSponsored && (
               <EditGasIconButton
                 supportsEIP1559={supportsEIP1559}
                 setShowCustomizeGasPopover={setShowCustomizeGasPopover}
@@ -98,12 +95,12 @@ export const EditGasFeesRow = ({
               <FiatValue
                 fullValue={fiatFeeWith18SignificantDigits}
                 roundedValue={fiatValue}
-                isSponsored={isSponsored}
+                isSponsored={isGasFeeSponsored}
               />
             ) : (
               <TokenValue roundedValue={tokenValue} />
             )}
-            {!isSponsored && (
+            {!isGasFeeSponsored && (
               <SelectedGasFeeToken />
             )}
           </Box>
