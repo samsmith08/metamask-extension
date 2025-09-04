@@ -3,7 +3,6 @@ import { Hex } from '@metamask/utils';
 import React, { Dispatch, SetStateAction } from 'react';
 import { useSelector } from 'react-redux';
 import { TEST_CHAINS } from '../../../../../../../../shared/constants/network';
-import { NATIVE_TOKEN_ADDRESS } from '../../../../../../../../shared/constants/transaction';
 import { ConfirmInfoAlertRow } from '../../../../../../../components/app/confirm/info/row/alert-row/alert-row';
 import { RowAlertKey } from '../../../../../../../components/app/confirm/info/row/constants';
 import { Box, Text } from '../../../../../../../components/component-library';
@@ -49,13 +48,12 @@ export const EditGasFeesRow = ({
     selectConfirmationAdvancedDetailsOpen,
   );
 
-  const { chainId, simulationData } = transactionMeta;
+  const { chainId, isGasFeeSponsored, simulationData } = transactionMeta;
   const gasFeeToken = useSelectedGasFeeToken();
   const showFiat = useShowFiat(chainId);
   const fiatValue = gasFeeToken ? gasFeeToken.amountFiat : fiatFee;
   const tokenValue = gasFeeToken ? gasFeeToken.amountFormatted : nativeFee;
   const metamaskFeeFiat = gasFeeToken?.metamaskFeeFiat;
-  const isGasFeeSponsored = transactionMeta.isGasFeeSponsored;
 
   const tooltip = gasFeeToken
     ? t('confirmGasFeeTokenTooltip', [metamaskFeeFiat])
@@ -100,9 +98,7 @@ export const EditGasFeesRow = ({
             ) : (
               <TokenValue roundedValue={tokenValue} />
             )}
-            {!isGasFeeSponsored && (
-              <SelectedGasFeeToken />
-            )}
+            {!isGasFeeSponsored && <SelectedGasFeeToken />}
           </Box>
         )}
       </ConfirmInfoAlertRow>
@@ -165,15 +161,23 @@ function FiatValue({
     </Text>
   );
 
-  const FreeNotice = isSponsored && <Text color={TextColor.successDefault} style={{ marginRight: '4px' }}>Free</Text>;
-  const ConditionalValue = isSponsored ? (<Text color={color} style={{ textDecoration: 'line-through' }}>{value}</Text>) : value
+  const FreeNotice = isSponsored && (
+    <Text color={TextColor.successDefault} style={{ marginRight: '4px' }}>
+      Free
+    </Text>
+  );
+  const ConditionalValue = isSponsored ? (
+    <Text color={color} style={{ textDecoration: 'line-through' }}>
+      {value}
+    </Text>
+  ) : (
+    value
+  );
 
   return fullValue ? (
     <>
       {FreeNotice}
-      <Tooltip title={fullValue}>
-        {ConditionalValue}
-      </Tooltip>
+      <Tooltip title={fullValue}>{ConditionalValue}</Tooltip>
     </>
   ) : (
     <>
