@@ -7,7 +7,7 @@ import {
 import { mockMultiNetworkBalancePolling } from '../../mock-balance-polling/mock-balance-polling';
 
 // Simplified ETH->DAI trade mock with only essential data for hardware wallet swap test
-export const SWAP_ETH_DAI_TRADES_MOCK = [
+const SWAP_ETH_DAI_TRADES_MOCK = [
   {
     // Primary successful trade option (airswapV4)
     trade: {
@@ -119,10 +119,25 @@ export const SWAP_ETH_DAI_TRADES_MOCK = [
   },
 ];
 
+// Generic catch-all for any token icons on any chain - covers ETH, DAI, and others
+export async function mockIcon(mockServer: MockttpServer) {
+  const tokenIconResponse = {
+    statusCode: 200,
+    body: 'fake-image-data',
+    headers: { 'content-type': 'image/png' },
+  };
+
+  await mockServer
+    .forGet(
+      /https:\/\/static\.cx\.metamask\.io\/api\/v1\/tokenIcons\/\d+\/0x[a-fA-F0-9]{40}\.png/u,
+    )
+    .thenCallback(() => tokenIconResponse);
+}
+
 export async function mockEthDaiTrade(mockServer: MockttpServer) {
   return [
     await mockServer
-      .forGet('https://swap.api.cx.metamask.io/networks/1/trades')
+      .forGet('https://bridge.api.cx.metamask.io/networks/1/trades')
       .thenCallback(() => {
         return {
           statusCode: 200,
