@@ -21,6 +21,10 @@ import {
   getTransactionControllerInitMessenger,
 } from './transaction-controller-messenger';
 import {
+  getBackendWebSocketServiceMessenger,
+  getAccountActivityServiceMessenger,
+} from './backend-platform';
+import {
   getMultichainBalancesControllerMessenger,
   getMultichainTransactionsControllerMessenger,
   getMultichainAssetsControllerMessenger,
@@ -520,6 +524,14 @@ export const CONTROLLER_MESSENGERS = {
   },
   WebSocketService: {
     getMessenger: getWebSocketServiceMessenger,
+    getInitMessenger: noop,
+  },
+  BackendWebSocketService: {
+    getMessenger: getBackendWebSocketServiceMessenger,
+    getInitMessenger: noop,
+  },
+  AccountActivityService: {
+    getMessenger: getAccountActivityServiceMessenger,
     getInitMessenger: noop,
   },
   SmartTransactionsController: {
