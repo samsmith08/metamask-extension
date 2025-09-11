@@ -656,8 +656,7 @@ export default class MetamaskController extends EventEmitter {
         'NetworkController:stateChange',
         'KeyringController:accountRemoved',
         'AccountActivityService:balanceUpdated',
-        'AccountActivityService:websocketConnected',
-        'AccountActivityService:websocketDisconnected',
+        'AccountActivityService:statusChanged',
       ],
     });
 
