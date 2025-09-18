@@ -16,7 +16,9 @@ import { ENVIRONMENT } from '../../../../development/build/constants';
 function isDevOrTestBuild() {
   return (
     process.env.METAMASK_ENVIRONMENT === ENVIRONMENT.DEVELOPMENT ||
-    process.env.METAMASK_ENVIRONMENT === ENVIRONMENT.TESTING
+    process.env.METAMASK_ENVIRONMENT === ENVIRONMENT.TESTING ||
+    process.env.METAMASK_ENVIRONMENT === ENVIRONMENT.OTHER ||
+    process.env.METAMASK_ENVIRONMENT === ENVIRONMENT.STAGING
   );
 }
 
