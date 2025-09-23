@@ -9,7 +9,10 @@ import {
   WebHIDConnectedStatuses,
 } from '../../../shared/constants/hardware-wallets';
 import * as actionConstants from '../../store/actionConstants';
-import { PasswordChangeToastType } from '../../../shared/constants/app-state';
+import {
+  PasswordChangeToastType,
+  NetworkConnectionBanner,
+} from '../../../shared/constants/app-state';
 
 type AppState = {
   customNonceValue: string;
@@ -130,6 +133,7 @@ type AppState = {
   showPasswordChangeToast: PasswordChangeToastType | null;
   showConnectionsRemovedModal: boolean;
   showCopyAddressToast: boolean;
+  networkConnectionBanner: NetworkConnectionBanner;
 };
 
 export type AppSliceState = {
@@ -232,6 +236,9 @@ const initialState: AppState = {
   showCopyAddressToast: false,
   showSupportDataConsentModal: false,
   showConnectionsRemovedModal: false,
+  networkConnectionBanner: {
+    status: 'unknown',
+  },
 };
 
 export default function reduceApp(
