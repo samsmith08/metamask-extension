@@ -437,7 +437,7 @@ exports[`AssetPage should render a native asset 1`] = `
               </button>
             </div>
             <div
-              class="flex flex-col gap-3 items-center justify-center bg-default max-w-48 mx-auto mt-5 mb-6"
+              class="flex flex-col gap-3 items-center justify-center bg-default mx-auto mt-5 mb-6 max-w-56"
               data-testid="activity-tab-empty-state"
             >
               <img
@@ -936,7 +936,7 @@ exports[`AssetPage should render an ERC20 asset without prices 1`] = `
               </button>
             </div>
             <div
-              class="flex flex-col gap-3 items-center justify-center bg-default max-w-48 mx-auto mt-5 mb-6"
+              class="flex flex-col gap-3 items-center justify-center bg-default mx-auto mt-5 mb-6 max-w-56"
               data-testid="activity-tab-empty-state"
             >
               <img
@@ -1464,7 +1464,7 @@ exports[`AssetPage should render an ERC20 token with prices 1`] = `
               </button>
             </div>
             <div
-              class="flex flex-col gap-3 items-center justify-center bg-default max-w-48 mx-auto mt-5 mb-6"
+              class="flex flex-col gap-3 items-center justify-center bg-default mx-auto mt-5 mb-6 max-w-56"
               data-testid="activity-tab-empty-state"
             >
               <img
