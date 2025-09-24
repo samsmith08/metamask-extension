@@ -2,6 +2,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
+import { InternalAccount } from '@metamask/keyring-internal-api';
 import { renderWithProvider } from '../../../../test/jest';
 import mockState from '../../../../test/data/mock-state.json';
 import { ThemeType } from '../../../../shared/constants/preferences';
@@ -10,11 +11,32 @@ import {
   type TransactionActivityEmptyStateProps,
 } from './transaction-activity-empty-state';
 
+const mockAccount: InternalAccount = {
+  id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+  address: '0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc',
+  type: 'eip155:eoa',
+  options: {},
+  scopes: ['eip155:1'],
+  methods: [
+    'personal_sign',
+    'eth_sign',
+    'eth_signTransaction',
+    'eth_signTypedData_v1',
+    'eth_signTypedData_v3',
+    'eth_signTypedData_v4',
+  ],
+  metadata: {
+    name: 'Account 1',
+    keyring: { type: 'HD Key Tree' },
+    importTime: Date.now(),
+  },
+};
+
 describe('TransactionActivityEmptyState', () => {
   const middleware = [thunk];
 
   const renderComponent = (
-    props: TransactionActivityEmptyStateProps = {},
+    props: Partial<TransactionActivityEmptyStateProps> = {},
     stateOverrides = {},
   ) => {
     const store = configureMockStore(middleware)({
@@ -23,7 +45,7 @@ describe('TransactionActivityEmptyState', () => {
     });
 
     return renderWithProvider(
-      <TransactionActivityEmptyState {...props} />,
+      <TransactionActivityEmptyState account={mockAccount} {...props} />,
       store,
     );
   };
@@ -36,9 +58,7 @@ describe('TransactionActivityEmptyState', () => {
   it('renders description text', () => {
     renderComponent();
     expect(
-      screen.getByText(
-        'Nothing to see yet. Check the explorer for more recent activity.',
-      ),
+      screen.getByText('Nothing to see yet. Swap your first token today.'),
     ).toBeInTheDocument();
   });
 

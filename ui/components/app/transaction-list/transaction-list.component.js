@@ -741,7 +741,10 @@ export default function TransactionList({
         ) : null}
         {pendingTransactions.length === 0 &&
         completedTransactions.length === 0 ? (
-          <TransactionActivityEmptyState className="mx-auto mt-4" />
+          <TransactionActivityEmptyState
+            className="mx-auto mt-5 mb-6"
+            account={selectedAccount}
+          />
         ) : (
           <Box className="transaction-list__transactions">
             {pendingTransactions.length > 0 && (
