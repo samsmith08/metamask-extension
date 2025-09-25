@@ -4,6 +4,7 @@ import classnames from 'classnames';
 import {
   PAYMENT_TYPES,
   PaymentType,
+  PRODUCT_TYPES,
   ProductType,
   RECURRING_INTERVALS,
   RecurringInterval,
@@ -66,7 +67,10 @@ import {
   useUserSubscriptionByProduct,
   useUserSubscriptions,
 } from '../../hooks/subscription/useSubscription';
-import { TRANSACTION_SHIELD_ROUTE } from '../../helpers/constants/routes';
+import {
+  SETTINGS_ROUTE,
+  TRANSACTION_SHIELD_ROUTE,
+} from '../../helpers/constants/routes';
 import { useAsyncCallback } from '../../hooks/useAsync';
 import { ShieldPaymentModal } from './shield-payment-modal';
 import { Plan } from './types';
@@ -79,6 +83,7 @@ const ShieldPlan = () => {
 
   const {
     subscriptions,
+    trialedProducts,
     loading: subscriptionsLoading,
     error: subscriptionsError,
   } = useUserSubscriptions();
@@ -86,6 +91,7 @@ const ShieldPlan = () => {
     'shield' as ProductType,
     subscriptions,
   );
+  const isTrialed = trialedProducts?.includes(PRODUCT_TYPES.SHIELD);
 
   useEffect(() => {
     if (shieldSubscription) {
@@ -134,30 +140,28 @@ const ShieldPlan = () => {
     return availableTokenBalances[0];
   });
 
-  const [handleContinue, continueResult] = useAsyncCallback(async () => {
-    try {
+  const [handleSubscription, subscriptionResult] =
+    useAsyncCallback(async () => {
       if (selectedPaymentMethod === PAYMENT_TYPES.byCard) {
         await dispatch(
           startSubscriptionWithCard({
             products: ['shield' as ProductType],
-            isTrialRequested: true,
+            isTrialRequested: !isTrialed,
             recurringInterval: selectedPlan,
           }),
         );
       } else {
         log.error('Crypto payment method is not supported at the moment');
+        throw new Error('Crypto payment method is not supported at the moment');
       }
-    } catch (err) {
-      log.error('Error starting subscription', err);
-    }
-  }, []);
+    }, [selectedPlan, selectedPaymentMethod, dispatch, isTrialed]);
 
   const loading =
     subscriptionsLoading ||
     subscriptionPricingLoading ||
-    continueResult.pending;
+    subscriptionResult.pending;
   const error =
-    subscriptionsError || subscriptionPricingError || continueResult.error;
+    subscriptionsError || subscriptionPricingError || subscriptionResult.error;
 
   const plans: Plan[] = useMemo(
     () =>
@@ -195,7 +199,9 @@ const ShieldPlan = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const handleBack = () => {
-    navigate(-1);
+    // transaction shield settings page has guard to redirect to current shield plan page if there is no subscription
+    // which create a loop so we just back to settings page
+    navigate(SETTINGS_ROUTE, { replace: true });
   };
 
   const rowsStyleProps: BoxProps<'div'> = {
@@ -386,7 +392,7 @@ const ShieldPlan = () => {
               size={ButtonSize.Lg}
               variant={ButtonVariant.Primary}
               block
-              onClick={handleContinue}
+              onClick={handleSubscription}
             >
               {t('continue')}
             </Button>

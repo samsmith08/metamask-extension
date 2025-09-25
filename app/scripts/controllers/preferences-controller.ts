@@ -6,7 +6,7 @@ import {
   AccountsControllerSetSelectedAccountAction,
   AccountsControllerState,
 } from '@metamask/accounts-controller';
-import { Json } from '@metamask/utils';
+import { Json, Hex } from '@metamask/utils';
 import {
   BaseController,
   ControllerGetStateAction,
@@ -21,6 +21,15 @@ import {
 import { IPFS_DEFAULT_GATEWAY_URL } from '../../../shared/constants/network';
 import { LedgerTransportTypes } from '../../../shared/constants/hardware-wallets';
 import { ThemeType } from '../../../shared/constants/preferences';
+
+/**
+ * Referral status for an account (currently used for Hyperliquid referrals)
+ */
+export enum ReferralStatus {
+  Approved = 'approved',
+  Passed = 'passed',
+  Declined = 'declined',
+}
 
 type AccountIdentityEntry = {
   address: string;
@@ -120,6 +129,9 @@ export type PreferencesControllerState = Omit<
   | 'privacyMode'
   | 'tokenSortConfig'
   | 'useMultiRpcMigration'
+  | 'dismissSmartAccountSuggestionEnabled'
+  | 'smartAccountOptIn'
+  | 'smartAccountOptInForAccounts'
 > & {
   addSnapAccountEnabled?: boolean;
   advancedGasFee: Record<string, Record<string, string>>;
@@ -146,6 +158,9 @@ export type PreferencesControllerState = Omit<
   useExternalServices: boolean;
   useMultiAccountBalanceChecker: boolean;
   usePhishDetect: boolean;
+  referrals: {
+    hyperliquid: Record<Hex, ReferralStatus>;
+  };
 
   ///: BEGIN:ONLY_INCLUDE_IF(build-flask)
   watchEthereumAccountEnabled: boolean;
@@ -210,6 +225,7 @@ export const getDefaultPreferencesControllerState =
     },
     securityAlertsEnabled: true,
     selectedAddress: '',
+    // TODO: Delete this state, it's currently unused
     showIncomingTransactions: {
       [ETHERSCAN_SUPPORTED_CHAIN_IDS.MAINNET]: true,
       [ETHERSCAN_SUPPORTED_CHAIN_IDS.GOERLI]: true,
@@ -231,6 +247,7 @@ export const getDefaultPreferencesControllerState =
       [ETHERSCAN_SUPPORTED_CHAIN_IDS.MOONBEAM_TESTNET]: true,
       [ETHERSCAN_SUPPORTED_CHAIN_IDS.MOONRIVER]: true,
       [ETHERSCAN_SUPPORTED_CHAIN_IDS.GNOSIS]: true,
+      [ETHERSCAN_SUPPORTED_CHAIN_IDS.SEI]: true,
     },
     snapRegistryList: {},
     ///: BEGIN:ONLY_INCLUDE_IF(keyring-snaps)
@@ -255,6 +272,9 @@ export const getDefaultPreferencesControllerState =
     useTokenDetection: true,
     useTransactionSimulations: true,
     watchEthereumAccountEnabled: false,
+    referrals: {
+      hyperliquid: {},
+    },
   });
 
 /**
@@ -266,148 +286,239 @@ export const getDefaultPreferencesControllerState =
  */
 const controllerMetadata = {
   addSnapAccountEnabled: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
   advancedGasFee: {
     persist: true,
+    includeInStateLogs: true,
     anonymous: true,
+    usedInUi: true,
   },
   currentLocale: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   dismissSeedBackUpReminder: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   enableMV3TimestampSave: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   featureFlags: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   forgottenPassword: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   identities: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
   ipfsGateway: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
   isIpfsGatewayEnabled: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
-  isMultiAccountBalancesEnabled: { persist: true, anonymous: true },
+  isMultiAccountBalancesEnabled: {
+    includeInStateLogs: true,
+    persist: true,
+    anonymous: true,
+    usedInUi: true,
+  },
   knownMethodData: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
   ledgerTransportType: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   lostIdentities: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
-  manageInstitutionalWallets: { persist: true, anonymous: false },
+  manageInstitutionalWallets: {
+    includeInStateLogs: true,
+    persist: true,
+    anonymous: false,
+    usedInUi: true,
+  },
   openSeaEnabled: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   overrideContentSecurityPolicyHeader: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   preferences: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   securityAlertsEnabled: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
   selectedAddress: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
-  showIncomingTransactions: { persist: true, anonymous: true },
+  showIncomingTransactions: {
+    includeInStateLogs: true,
+    persist: true,
+    anonymous: true,
+    usedInUi: true,
+  },
   snapRegistryList: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
   snapsAddSnapAccountModalDismissed: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
   textDirection: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
   theme: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   use4ByteResolution: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   useAddressBarEnsResolution: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   /** @deprecated Use avatarType instead */
   useBlockie: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   useCurrencyRateCheck: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   useExternalNameSources: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
   useExternalServices: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
   useMultiAccountBalanceChecker: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   useNftDetection: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   usePhishDetect: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   useSafeChainsListValidation: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
   },
   useTokenDetection: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   useTransactionSimulations: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: true,
+    usedInUi: true,
   },
   watchEthereumAccountEnabled: {
+    includeInStateLogs: true,
     persist: true,
     anonymous: false,
+    usedInUi: true,
+  },
+  referrals: {
+    includeInStateLogs: true,
+    persist: true,
+    anonymous: false,
+    usedInUi: true,
   },
 };
 
@@ -967,6 +1078,38 @@ export class PreferencesController extends BaseController<
       state.identities = updatedIdentities;
       state.lostIdentities = updatedLostIdentities;
       state.selectedAddress = selectedAccount?.address || ''; // it will be an empty string during onboarding
+    });
+  }
+
+  addReferralApprovedAccount(accountAddress: Hex) {
+    this.update((state) => {
+      state.referrals.hyperliquid[accountAddress] = ReferralStatus.Approved;
+    });
+  }
+
+  addReferralPassedAccount(accountAddress: Hex) {
+    this.update((state) => {
+      state.referrals.hyperliquid[accountAddress] = ReferralStatus.Passed;
+    });
+  }
+
+  addReferralDeclinedAccount(accountAddress: Hex) {
+    this.update((state) => {
+      state.referrals.hyperliquid[accountAddress] = ReferralStatus.Declined;
+    });
+  }
+
+  removeReferralDeclinedAccount(accountAddress: Hex) {
+    this.update((state) => {
+      delete state.referrals.hyperliquid[accountAddress];
+    });
+  }
+
+  setAccountsReferralApproved(accountAddresses: Hex[]) {
+    this.update((state) => {
+      accountAddresses.forEach((address) => {
+        state.referrals.hyperliquid[address] = ReferralStatus.Approved;
+      });
     });
   }
 }
