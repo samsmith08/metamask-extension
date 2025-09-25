@@ -1,4 +1,3 @@
-import { getIdentityAPI } from '../../../../shared/lib/oauth';
 import { WebAuthenticator } from './types';
 import { base64urlencode } from './utils';
 
