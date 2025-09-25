@@ -30,5 +30,8 @@
   "tailwindCSS.validate": true,
   "typescript.tsdk": "node_modules/typescript/lib",
   "workbench.editor.enablePreviewFromCodeNavigation": true,
-  "workbench.editor.enablePreviewFromQuickOpen": true
+  "workbench.editor.enablePreviewFromQuickOpen": true,
+  "cSpell.words": [
+    "ethersproject"
+  ]
 }
